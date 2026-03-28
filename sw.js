@@ -1,10 +1,11 @@
 const CACHE_NAME = 'spend-tracker-v1';
+const BASE = '/Finance-tracker';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/manifest.json'
+  BASE + '/',
+  BASE + '/index.html',
+  BASE + '/style.css',
+  BASE + '/app.js',
+  BASE + '/manifest.json'
 ];
 
 self.addEventListener('install', e => {
