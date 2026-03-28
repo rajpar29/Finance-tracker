@@ -26,7 +26,6 @@ body {
   flex-direction: column;
 }
 
-/* ── Layout ── */
 .app-header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -71,7 +70,6 @@ body {
 .view { display: none; padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; }
 .view.active { display: block; }
 
-/* ── Cards ── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -88,7 +86,6 @@ body {
   margin-bottom: 16px;
 }
 
-/* ── Form ── */
 .form-group { margin-bottom: 16px; }
 .form-group label {
   display: block;
@@ -132,7 +129,6 @@ body {
 }
 .amount-input-wrap input { padding-left: 28px; }
 
-/* Category Grid */
 .category-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -163,7 +159,6 @@ body {
   color: var(--primary-light);
 }
 
-/* Submit Button */
 .btn-primary {
   width: 100%;
   padding: 14px;
@@ -180,7 +175,6 @@ body {
 .btn-primary:hover { background: var(--primary-dark); }
 .btn-primary:active { transform: scale(0.98); }
 
-/* ── Expense List ── */
 .date-nav {
   display: flex;
   align-items: center;
@@ -266,7 +260,6 @@ body {
 .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
 .empty-state p { font-size: 0.9rem; }
 
-/* ── Summary ── */
 .month-nav {
   display: flex;
   align-items: center;
@@ -286,7 +279,6 @@ body {
 .summary-total .big-amount { font-size: 2.8rem; font-weight: 900; margin-top: 6px; letter-spacing: -1px; }
 .summary-total .txn-count { font-size: 0.8rem; opacity: 0.75; margin-top: 4px; }
 
-.category-breakdown { margin-bottom: 20px; }
 .cat-row {
   display: flex;
   align-items: center;
@@ -303,7 +295,6 @@ body {
 .cat-row .cat-amt { font-weight: 700; font-size: 0.95rem; color: var(--text); flex-shrink: 0; }
 .cat-row .cat-pct { font-size: 0.75rem; color: var(--text-muted); flex-shrink: 0; min-width: 36px; text-align: right; }
 
-/* Daily breakdown in summary */
 .daily-list { display: flex; flex-direction: column; gap: 6px; }
 .daily-row {
   display: flex;
@@ -321,7 +312,6 @@ body {
 .daily-row .day-amt { font-weight: 700; color: var(--primary-light); }
 .daily-row .day-txns { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
 
-/* Toast */
 #toast {
   position: fixed;
   bottom: 24px;
@@ -340,7 +330,23 @@ body {
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
-/* Install banner */
+.data-actions { display: flex; gap: 10px; }
+.btn-data {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-data:hover { background: var(--border); }
+.btn-data.btn-import { border-color: var(--primary); color: var(--primary-light); }
+.btn-data.btn-import:hover { background: rgba(99,102,241,0.15); }
+
 #install-banner {
   display: none;
   background: var(--surface);
