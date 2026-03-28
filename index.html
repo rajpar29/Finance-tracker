@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#6366f1" />
+  <meta name="description" content="Track your daily expenses by category with monthly summaries" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SpendTrack" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+  <link rel="stylesheet" href="style.css" />
+  <title>SpendTrack</title>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="app-header">
+    <h1>Spend<span>Track</span></h1>
+    <span style="font-size:1.4rem">💰</span>
+  </header>
+
+  <!-- Tab Bar -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="add">
+      <span class="icon">➕</span> Add
+    </button>
+    <button class="tab-btn" data-tab="expenses">
+      <span class="icon">📋</span> Expenses
+    </button>
+    <button class="tab-btn" data-tab="summary">
+      <span class="icon">📊</span> Summary
+    </button>
+  </nav>
+
+  <!-- ── Add Expense View ── -->
+  <main id="add-view" class="view active">
+    <form id="add-form">
+
+      <div class="card">
+        <div class="card-title">Amount</div>
+        <div class="form-group">
+          <div class="amount-input-wrap">
+            <span class="currency-symbol">₹</span>
+            <input type="number" id="exp-amount" min="0.01" step="0.01"
+              placeholder="0.00" inputmode="decimal" required />
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Category</div>
+        <div class="category-grid" id="category-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Details</div>
+        <div class="form-group">
+          <label for="exp-desc">Description (optional)</label>
+          <input type="text" id="exp-desc" placeholder="e.g. Lunch at Cafe" maxlength="100" />
+        </div>
+        <div class="form-group">
+          <label for="exp-date">Date</label>
+          <input type="date" id="exp-date" required />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Add Expense</button>
+    </form>
+  </main>
+
+  <!-- ── Expenses View ── -->
+  <main id="expenses-view" class="view">
+
+    <div class="date-nav">
+      <button class="nav-btn" id="prev-day">◀</button>
+      <h2 id="view-date-label">Today</h2>
+      <button class="nav-btn" id="next-day">▶</button>
+    </div>
+
+    <div class="day-total">
+      <span class="label">Total Spent</span>
+      <span class="amount" id="day-total-amount">₹0.00</span>
+    </div>
+
+    <div class="expense-list" id="expense-list"></div>
+
+  </main>
+
+  <!-- ── Summary View ── -->
+  <main id="summary-view" class="view">
+
+    <div class="month-nav">
+      <button class="nav-btn" id="prev-month">◀</button>
+      <h2 id="summary-month-label">March 2026</h2>
+      <button class="nav-btn" id="next-month">▶</button>
+    </div>
+
+    <div class="summary-total">
+      <div class="label">Total Spent This Month</div>
+      <div class="big-amount" id="summary-total-amount">₹0.00</div>
+      <div class="txn-count" id="summary-txn-count">0 transactions</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">By Category</div>
+      <div id="cat-breakdown"></div>
+    </div>
+
+    <div class="card" id="daily-breakdown"></div>
+
+  </main>
+
+  <!-- Toast notification -->
+  <div id="toast"></div>
+
+  <!-- PWA Install Banner -->
+  <div id="install-banner">
+    Install app for offline use
+    <button id="install-btn">Install</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
