@@ -284,6 +284,44 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── Export / Import ───────────────────────────────────────
+function initDataActions() {
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const data = { version: 1, exported: new Date().toISOString(), expenses };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `spendtrack-${todayStr()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Exported!');
+  });
+
+  const fileInput = document.getElementById('import-file');
+  document.getElementById('import-btn').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        const imported = Array.isArray(data) ? data : (data.expenses || []);
+        if (!Array.isArray(imported)) throw new Error();
+        const existingIds = new Set(expenses.map(e => e.id));
+        const newOnes = imported.filter(e => e.id && e.amount && e.date && !existingIds.has(e.id));
+        expenses = [...newOnes, ...expenses];
+        saveExpenses();
+        showToast(`Imported ${newOnes.length} expense${newOnes.length !== 1 ? 's' : ''}`);
+        renderSummary();
+      } catch { showToast('Invalid file'); }
+    };
+    reader.readAsText(file);
+    fileInput.value = '';
+  });
+}
+
 // ── PWA install prompt ─────────────────────────────────────
 let deferredInstall = null;
 window.addEventListener('beforeinstallprompt', e => {
@@ -303,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAddForm();
   initExpensesView();
   initSummaryView();
+  initDataActions();
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});

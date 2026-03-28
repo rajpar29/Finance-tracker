@@ -340,6 +340,24 @@ body {
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
+/* Data export/import */
+.data-actions { display: flex; gap: 10px; }
+.btn-data {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-data:hover { background: var(--border); }
+.btn-data.btn-import { border-color: var(--primary); color: var(--primary-light); }
+.btn-data.btn-import:hover { background: rgba(99,102,241,0.15); }
+
 /* Install banner */
 #install-banner {
   display: none;
