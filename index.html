@@ -9,19 +9,17 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="SpendTrack" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="style.css" />
   <title>SpendTrack</title>
 </head>
 <body>
 
-  <!-- Header -->
   <header class="app-header">
     <h1>Spend<span>Track</span></h1>
     <span style="font-size:1.4rem">💰</span>
   </header>
 
-  <!-- Tab Bar -->
   <nav class="tab-bar">
     <button class="tab-btn active" data-tab="add">
       <span class="icon">➕</span> Add
@@ -52,6 +50,15 @@
       <div class="card">
         <div class="card-title">Category</div>
         <div class="category-grid" id="category-grid"></div>
+        <!-- Inline add-category form -->
+        <div id="add-cat-form" style="display:none">
+          <div class="add-cat-inputs">
+            <input type="text" id="new-cat-icon" placeholder="😀" maxlength="4" class="icon-input" />
+            <input type="text" id="new-cat-name" placeholder="Category name" maxlength="20" class="name-input" />
+            <button type="button" id="save-cat-btn" class="btn-cat-action btn-cat-save">Add</button>
+            <button type="button" id="cancel-cat-btn" class="btn-cat-action btn-cat-cancel">✕</button>
+          </div>
+        </div>
       </div>
 
       <div class="card">
@@ -72,44 +79,35 @@
 
   <!-- ── Expenses View ── -->
   <main id="expenses-view" class="view">
-
     <div class="date-nav">
       <button class="nav-btn" id="prev-day">◀</button>
       <h2 id="view-date-label">Today</h2>
       <button class="nav-btn" id="next-day">▶</button>
     </div>
-
     <div class="day-total">
       <span class="label">Total Spent</span>
       <span class="amount" id="day-total-amount">₹0.00</span>
     </div>
-
     <div class="expense-list" id="expense-list"></div>
-
   </main>
 
   <!-- ── Summary View ── -->
   <main id="summary-view" class="view">
-
     <div class="month-nav">
       <button class="nav-btn" id="prev-month">◀</button>
       <h2 id="summary-month-label">March 2026</h2>
       <button class="nav-btn" id="next-month">▶</button>
     </div>
-
     <div class="summary-total">
       <div class="label">Total Spent This Month</div>
       <div class="big-amount" id="summary-total-amount">₹0.00</div>
       <div class="txn-count" id="summary-txn-count">0 transactions</div>
     </div>
-
     <div class="card">
       <div class="card-title">By Category</div>
       <div id="cat-breakdown"></div>
     </div>
-
     <div class="card" id="daily-breakdown"></div>
-
     <div class="card">
       <div class="card-title">Data</div>
       <div class="data-actions">
@@ -118,16 +116,21 @@
         <input type="file" id="import-file" accept=".json" style="display:none" />
       </div>
     </div>
-
   </main>
 
-  <!-- Toast notification -->
   <div id="toast"></div>
 
   <!-- PWA Install Banner -->
   <div id="install-banner">
     Install app for offline use
     <button id="install-btn">Install</button>
+  </div>
+
+  <!-- SW Update Banner -->
+  <div id="update-banner">
+    <span>🆕 Update available</span>
+    <button id="update-btn">Reload</button>
+    <button id="dismiss-update-btn">✕</button>
   </div>
 
   <script src="app.js"></script>

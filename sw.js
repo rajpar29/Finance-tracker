@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spend-tracker-v1';
+const CACHE_NAME = 'spend-tracker-v2';
 const BASE = '/Finance-tracker';
 const ASSETS = [
   BASE + '/',
@@ -12,7 +12,7 @@ self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
-  self.skipWaiting();
+  // Don't skipWaiting — let the app decide when to activate
 });
 
 self.addEventListener('activate', e => {
@@ -28,4 +28,9 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
+});
+
+// App sends this message when user clicks "Update"
+self.addEventListener('message', e => {
+  if (e.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
