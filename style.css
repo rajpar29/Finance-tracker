@@ -129,6 +129,7 @@ body {
 }
 .amount-input-wrap input { padding-left: 28px; }
 
+/* Category Grid */
 .category-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -158,6 +159,85 @@ body {
   background: rgba(99,102,241,0.15);
   color: var(--primary-light);
 }
+
+/* Custom category delete badge */
+.cat-btn.custom-cat { position: relative; }
+.cat-del-btn {
+  position: absolute;
+  top: -7px; right: -7px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--danger);
+  color: white;
+  border: none;
+  font-size: 13px;
+  line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  z-index: 2;
+}
+
+/* Add new category button */
+.cat-add-btn {
+  border-style: dashed !important;
+  color: var(--primary-light) !important;
+  border-color: var(--primary) !important;
+}
+.cat-add-btn:hover { background: rgba(99,102,241,0.1) !important; }
+
+/* Add category inline form */
+#add-cat-form {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.add-cat-inputs {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.add-cat-inputs .icon-input {
+  width: 58px;
+  text-align: center;
+  font-size: 1.3rem;
+  padding: 8px 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  outline: none;
+  flex-shrink: 0;
+}
+.add-cat-inputs .icon-input:focus { border-color: var(--primary); }
+.add-cat-inputs .name-input {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.95rem;
+  outline: none;
+}
+.add-cat-inputs .name-input:focus { border-color: var(--primary); }
+.btn-cat-action {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+.btn-cat-save { background: var(--primary); color: white; }
+.btn-cat-save:hover { background: var(--primary-dark); }
+.btn-cat-cancel { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+.btn-cat-cancel:hover { background: var(--border); }
 
 .btn-primary {
   width: 100%;
@@ -329,6 +409,44 @@ body {
   white-space: nowrap;
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
+
+/* SW Update banner */
+#update-banner {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--primary-dark);
+  color: white;
+  padding: 12px 20px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 300;
+  border-top: 2px solid var(--primary-light);
+}
+#update-banner #update-btn {
+  background: white;
+  color: var(--primary-dark);
+  border: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#update-banner #dismiss-update-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.4);
+  color: white;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .data-actions { display: flex; gap: 10px; }
 .btn-data {
