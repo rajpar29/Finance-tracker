@@ -1,6 +1,7 @@
 'use strict';
 
-const CATEGORIES = [
+// ── Default categories ───────────────────────────────────
+const DEFAULT_CATEGORIES = [
   { id: 'food',          label: 'Food',        icon: '🍔' },
   { id: 'transport',     label: 'Transport',   icon: '🚗' },
   { id: 'shopping',      label: 'Shopping',    icon: '🛍️' },
@@ -12,12 +13,16 @@ const CATEGORIES = [
 ];
 
 const STORAGE_KEY = 'spend_tracker_expenses';
+const CAT_KEY     = 'spend_tracker_cats';
 
-let expenses = loadExpenses();
+// ── State ───────────────────────────────────────────────
+let expenses       = loadExpenses();
+let categories     = loadCategories();
 let selectedCategory = null;
-let viewDate = todayStr();
-let summaryDate = new Date();
+let viewDate       = todayStr();
+let summaryDate    = new Date();
 
+// ── Helpers ─────────────────────────────────────────────
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -27,6 +32,15 @@ function loadExpenses() {
 }
 function saveExpenses() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+}
+function loadCategories() {
+  try {
+    const custom = JSON.parse(localStorage.getItem(CAT_KEY)) || [];
+    return [...DEFAULT_CATEGORIES, ...custom];
+  } catch { return [...DEFAULT_CATEGORIES]; }
+}
+function saveCustomCategories() {
+  localStorage.setItem(CAT_KEY, JSON.stringify(categories.filter(c => c.custom)));
 }
 function fmt(n) {
   return '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -41,13 +55,12 @@ function monthLabel(date) {
 function dayLabel(dateStr) {
   const today = todayStr();
   const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-  const yStr = yesterday.toISOString().slice(0, 10);
   if (dateStr === today) return 'Today';
-  if (dateStr === yStr)  return 'Yesterday';
+  if (dateStr === yesterday.toISOString().slice(0, 10)) return 'Yesterday';
   return parseDate(dateStr).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 function getCat(id) {
-  return CATEGORIES.find(c => c.id === id) || CATEGORIES[CATEGORIES.length - 1];
+  return categories.find(c => c.id === id) || DEFAULT_CATEGORIES[DEFAULT_CATEGORIES.length - 1];
 }
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -59,6 +72,7 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── Tabs ────────────────────────────────────────────────
 function initTabs() {
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -71,21 +85,84 @@ function initTabs() {
   });
 }
 
-function initAddForm() {
+// ── Category grid ────────────────────────────────────────
+function renderCategoryGrid() {
   const grid = document.getElementById('category-grid');
-  CATEGORIES.forEach(cat => {
+  grid.innerHTML = '';
+
+  categories.forEach(cat => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'cat-btn';
+    btn.className = 'cat-btn' + (cat.custom ? ' custom-cat' : '');
     btn.dataset.id = cat.id;
-    btn.innerHTML = `<span class="cat-icon">${cat.icon}</span><span>${cat.label}</span>`;
+    btn.innerHTML = `<span class="cat-icon">${cat.icon}</span><span>${escHtml(cat.label)}</span>`;
+    if (selectedCategory === cat.id) btn.classList.add('selected');
+
+    if (cat.custom) {
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'cat-del-btn';
+      del.title = 'Delete category';
+      del.textContent = '×';
+      del.addEventListener('click', e => { e.stopPropagation(); deleteCategory(cat.id); });
+      btn.appendChild(del);
+    }
+
     btn.addEventListener('click', () => {
       selectedCategory = cat.id;
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('selected', b.dataset.id === cat.id));
     });
     grid.appendChild(btn);
   });
+
+  // "+" add button
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'cat-btn cat-add-btn';
+  addBtn.innerHTML = '<span class="cat-icon">➕</span><span>New</span>';
+  addBtn.addEventListener('click', () => {
+    const form = document.getElementById('add-cat-form');
+    const isOpen = form.style.display !== 'none';
+    form.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) document.getElementById('new-cat-icon').focus();
+  });
+  grid.appendChild(addBtn);
+}
+
+function addCategory(icon, label) {
+  const id = 'c_' + Date.now();
+  categories.push({ id, icon: icon.trim() || '🏷️', label: label.trim(), custom: true });
+  saveCustomCategories();
+  renderCategoryGrid();
+}
+
+function deleteCategory(id) {
+  categories = categories.filter(c => c.id !== id);
+  saveCustomCategories();
+  if (selectedCategory === id) selectedCategory = null;
+  renderCategoryGrid();
+  showToast('Category deleted');
+}
+
+// ── Add Expense Form ─────────────────────────────────────
+function initAddForm() {
+  renderCategoryGrid();
   document.getElementById('exp-date').value = todayStr();
+
+  document.getElementById('save-cat-btn').addEventListener('click', () => {
+    const icon  = document.getElementById('new-cat-icon').value.trim();
+    const label = document.getElementById('new-cat-name').value.trim();
+    if (!label) { showToast('Enter a category name'); return; }
+    addCategory(icon || '🏷️', label);
+    document.getElementById('new-cat-icon').value = '';
+    document.getElementById('new-cat-name').value = '';
+    document.getElementById('add-cat-form').style.display = 'none';
+    showToast('Category added!');
+  });
+  document.getElementById('cancel-cat-btn').addEventListener('click', () => {
+    document.getElementById('add-cat-form').style.display = 'none';
+  });
+
   document.getElementById('add-form').addEventListener('submit', e => {
     e.preventDefault();
     const amount = parseFloat(document.getElementById('exp-amount').value);
@@ -105,6 +182,7 @@ function initAddForm() {
   });
 }
 
+// ── Expenses View ─────────────────────────────────────────
 function initExpensesView() {
   document.getElementById('prev-day').addEventListener('click', () => {
     const d = parseDate(viewDate); d.setDate(d.getDate() - 1);
@@ -131,11 +209,14 @@ function renderExpenseList() {
   }
   list.innerHTML = dayExpenses.map(e => {
     const cat = getCat(e.category);
-    return `<div class="expense-item" data-id="${e.id}">
+    return `<div class="expense-item">
       <span class="cat-emoji">${cat.icon}</span>
-      <div class="details"><div class="name">${escHtml(e.desc)}</div><div class="cat-label">${cat.label}</div></div>
+      <div class="details">
+        <div class="name">${escHtml(e.desc)}</div>
+        <div class="cat-label">${escHtml(cat.label)}</div>
+      </div>
       <span class="item-amount">−${fmt(e.amount)}</span>
-      <button class="delete-btn" title="Delete" onclick="deleteExpense('${e.id}')">&#x1F5D1;&#xFE0F;</button>
+      <button class="delete-btn" title="Delete" onclick="deleteExpense('${e.id}')">🗑️</button>
     </div>`;
   }).join('');
 }
@@ -145,6 +226,7 @@ function deleteExpense(id) {
   saveExpenses(); renderExpenseList(); showToast('Deleted');
 }
 
+// ── Summary View ─────────────────────────────────────────
 function initSummaryView() {
   document.getElementById('prev-month').addEventListener('click', () => {
     summaryDate.setMonth(summaryDate.getMonth() - 1); renderSummary();
@@ -171,20 +253,31 @@ function renderSummary() {
   if (Object.keys(byCat).length === 0) {
     catBreakdown.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><p>No data for this month.</p></div>';
   } else {
-    catBreakdown.innerHTML = Object.entries(byCat).sort((a,b) => b[1]-a[1]).map(([id, amt]) => {
-      const cat = getCat(id), pct = total > 0 ? Math.round((amt/total)*100) : 0;
-      return `<div class="cat-row"><span class="emoji">${cat.icon}</span><div class="info"><div class="name">${cat.label}</div><div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div></div><span class="cat-amt">${fmt(amt)}</span><span class="cat-pct">${pct}%</span></div>`;
+    catBreakdown.innerHTML = Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([id, amt]) => {
+      const cat = getCat(id);
+      const pct = total > 0 ? Math.round((amt / total) * 100) : 0;
+      return `<div class="cat-row">
+        <span class="emoji">${cat.icon}</span>
+        <div class="info">
+          <div class="name">${escHtml(cat.label)}</div>
+          <div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div>
+        </div>
+        <span class="cat-amt">${fmt(amt)}</span>
+        <span class="cat-pct">${pct}%</span>
+      </div>`;
     }).join('');
   }
   const byDay = {};
-  monthExpenses.forEach(e => { byDay[e.date] = { total: (byDay[e.date]?.total||0)+e.amount, count: (byDay[e.date]?.count||0)+1 }; });
+  monthExpenses.forEach(e => {
+    byDay[e.date] = { total: (byDay[e.date]?.total || 0) + e.amount, count: (byDay[e.date]?.count || 0) + 1 };
+  });
   const dailyEl = document.getElementById('daily-breakdown');
-  const days = Object.entries(byDay).sort((a,b) => b[0].localeCompare(a[0]));
+  const days = Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0]));
   dailyEl.innerHTML = days.length === 0 ? '' :
     `<div class="card-title" style="margin-bottom:10px">Daily Breakdown</div><div class="daily-list">` +
     days.map(([date, data]) =>
       `<div class="daily-row" onclick="jumpToDay('${date}')">
-        <div><div class="day-label">${dayLabel(date)}</div><div class="day-txns">${data.count} txn${data.count!==1?'s':''}</div></div>
+        <div><div class="day-label">${dayLabel(date)}</div><div class="day-txns">${data.count} txn${data.count !== 1 ? 's' : ''}</div></div>
         <span class="day-amt">${fmt(data.total)}</span>
       </div>`).join('') + `</div>`;
 }
@@ -196,6 +289,7 @@ function jumpToDay(dateStr) {
   renderExpenseList();
 }
 
+// ── Export / Import ──────────────────────────────────────
 function initDataActions() {
   document.getElementById('export-btn').addEventListener('click', () => {
     const data = { version: 1, exported: new Date().toISOString(), expenses };
@@ -229,26 +323,57 @@ function initDataActions() {
   });
 }
 
+// ── PWA Install ────────────────────────────────────────────
 let deferredInstall = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredInstall = e;
-  const banner = document.getElementById('install-banner');
-  banner.style.display = 'block';
+  document.getElementById('install-banner').style.display = 'block';
   document.getElementById('install-btn').addEventListener('click', () => {
     deferredInstall.prompt();
-    banner.style.display = 'none';
+    document.getElementById('install-banner').style.display = 'none';
   });
 });
 
+// ── SW Auto-update ────────────────────────────────────────
+function showUpdateBanner(reg) {
+  const banner = document.getElementById('update-banner');
+  banner.style.display = 'flex';
+  document.getElementById('update-btn').addEventListener('click', () => {
+    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+  });
+  document.getElementById('dismiss-update-btn').addEventListener('click', () => {
+    banner.style.display = 'none';
+  });
+}
+
+// ── Boot ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initTabs();
   initAddForm();
   initExpensesView();
   initSummaryView();
   initDataActions();
+
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      reg.update();
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') reg.update();
+      });
+      if (reg.waiting) { showUpdateBanner(reg); return; }
+      reg.addEventListener('updatefound', () => {
+        const newSW = reg.installing;
+        newSW.addEventListener('statechange', () => {
+          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+            showUpdateBanner(reg);
+          }
+        });
+      });
+    }).catch(() => {});
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
   }
 });
 
