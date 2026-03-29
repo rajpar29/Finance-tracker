@@ -115,7 +115,6 @@ function renderCategoryGrid() {
     grid.appendChild(btn);
   });
 
-  // "+" add button
   const addBtn = document.createElement('button');
   addBtn.type = 'button';
   addBtn.className = 'cat-btn cat-add-btn';
@@ -216,7 +215,7 @@ function renderExpenseList() {
         <div class="cat-label">${escHtml(cat.label)}</div>
       </div>
       <span class="item-amount">−${fmt(e.amount)}</span>
-      <button class="delete-btn" title="Delete" onclick="deleteExpense('${e.id}')">🗑️</button>
+      <button class="delete-btn" title="Delete" onclick="deleteExpense('${e.id}')">&#x1F5D1;&#xFE0F;</button>
     </div>`;
   }).join('');
 }
@@ -335,18 +334,6 @@ window.addEventListener('beforeinstallprompt', e => {
   });
 });
 
-// ── SW Auto-update ────────────────────────────────────────
-function showUpdateBanner(reg) {
-  const banner = document.getElementById('update-banner');
-  banner.style.display = 'flex';
-  document.getElementById('update-btn').addEventListener('click', () => {
-    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-  });
-  document.getElementById('dismiss-update-btn').addEventListener('click', () => {
-    banner.style.display = 'none';
-  });
-}
-
 // ── Boot ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initTabs();
@@ -357,22 +344,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').then(reg => {
+      // Check for updates on load and when app is resumed
       reg.update();
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') reg.update();
       });
-      if (reg.waiting) { showUpdateBanner(reg); return; }
-      reg.addEventListener('updatefound', () => {
-        const newSW = reg.installing;
-        newSW.addEventListener('statechange', () => {
-          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-            showUpdateBanner(reg);
-          }
-        });
-      });
     }).catch(() => {});
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
+
+    // SW posts SW_UPDATED when it activates and finds a stale cache
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data?.type === 'SW_UPDATED') {
+        const banner = document.getElementById('update-banner');
+        banner.style.display = 'flex';
+        document.getElementById('update-btn').addEventListener('click', () => window.location.reload());
+        document.getElementById('dismiss-update-btn').addEventListener('click', () => {
+          banner.style.display = 'none';
+        });
+      }
     });
   }
 });
