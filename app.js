@@ -343,18 +343,6 @@ window.addEventListener('beforeinstallprompt', e => {
   });
 });
 
-// ── SW Auto-update ─────────────────────────────────────────
-function showUpdateBanner(reg) {
-  const banner = document.getElementById('update-banner');
-  banner.style.display = 'flex';
-  document.getElementById('update-btn').addEventListener('click', () => {
-    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-  });
-  document.getElementById('dismiss-update-btn').addEventListener('click', () => {
-    banner.style.display = 'none';
-  });
-}
-
 // ── Boot ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initTabs();
@@ -365,29 +353,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').then(reg => {
-      // Check for update immediately and when app regains focus
+      // Check for updates on load and when app is resumed
       reg.update();
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') reg.update();
       });
-
-      // New SW already waiting (e.g. second visit after deploy)
-      if (reg.waiting) { showUpdateBanner(reg); return; }
-
-      // New SW found while page is open
-      reg.addEventListener('updatefound', () => {
-        const newSW = reg.installing;
-        newSW.addEventListener('statechange', () => {
-          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-            showUpdateBanner(reg);
-          }
-        });
-      });
     }).catch(() => {});
 
-    // After skipWaiting, reload to activate new SW
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
+    // SW posts SW_UPDATED when it activates and finds a stale cache
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data?.type === 'SW_UPDATED') {
+        const banner = document.getElementById('update-banner');
+        banner.style.display = 'flex';
+        document.getElementById('update-btn').addEventListener('click', () => window.location.reload());
+        document.getElementById('dismiss-update-btn').addEventListener('click', () => {
+          banner.style.display = 'none';
+        });
+      }
     });
   }
 });
